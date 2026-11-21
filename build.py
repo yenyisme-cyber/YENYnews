@@ -357,7 +357,7 @@ def build_article(a, arts):
     <a class="cat" href="{root}category/{CAT_SLUG[a["category"]]}.html">{e(a["category"])}</a>
     <h1>{e(a["title"])}</h1>
     {f'<p class="deck">{e(a["deck"])}</p>' if a.get("deck") else ""}
-    <div class="byline"><b>{e(a["author"])} 기자</b>{email}<span>입력 {fmt_date(a["date"])}</span>{updated}</div>
+    <div class="byline"><b>{e(a["author"]) + ("" if "편집국" in a["author"] else " 기자")}</b>{email}<span>입력 {fmt_date(a["date"])}</span>{updated}</div>
     {f'<img src="{root}{e(a["image"])}" alt="{e(a.get("image_caption", ""))}" style="margin-top:24px;border-radius:4px">' if a.get("image") else ""}
     <div class="article-body">{a["body_html"]}</div>
     {srcs}
