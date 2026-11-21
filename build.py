@@ -121,6 +121,17 @@ def reg(v, label="기재 예정"):
     return e(v) if v else f'<span class="fill">[{label}]</span>'
 
 
+REG_FIELDS = [("제호", "name"), ("등록번호", "reg_no"), ("등록일", "reg_date"),
+              ("발행일", "pub_date"), ("발행인", "publisher"), ("편집인", "editor"),
+              ("청소년보호책임자", "youth_officer"), ("주소", "address"), ("전화", "phone"),
+              ("이메일", "email"), ("사업자등록번호", "biz_no")]
+
+
+def reg_items(s):
+    """채워진 등록사항만 보여 줍니다. (신문 등록 후에는 모두 채워야 합니다)"""
+    return "".join(f"<span><b>{label}</b>{e(s[key])}</span>" for label, key in REG_FIELDS if s.get(key))
+
+
 def head(title, root, desc=""):
     full = f"{title} - {SITE['name']}" if title != SITE["name"] else title
     return f"""<!DOCTYPE html>
@@ -180,21 +191,7 @@ def footer(root):
     <div class="f-links">{links}</div>
     <div class="f-logo">예니<span>뉴스</span></div>
     <!-- 신문법 제19조 필요적 게재사항 + 청소년보호책임자 (build.py 의 SITE 에서 수정) -->
-    <div class="reg">
-      <span><b>제호</b>{e(s['name'])}</span>
-      <span><b>등록번호</b>{reg(s['reg_no'], '등록 후 기재')}</span>
-      <span><b>등록일</b>{reg(s['reg_date'], '등록 후 기재')}</span>
-      <span><b>발행일</b>{reg(s['pub_date'])}</span>
-      <span><b>발행인</b>{reg(s['publisher'])}</span>
-      <span><b>편집인</b>{reg(s['editor'])}</span>
-      <span><b>청소년보호책임자</b>{reg(s['youth_officer'])}</span>
-    </div>
-    <div class="reg">
-      <span><b>주소</b>{reg(s['address'])}</span>
-      <span><b>전화</b>{reg(s['phone'])}</span>
-      <span><b>이메일</b>{reg(s['email'])}</span>
-      <span><b>사업자등록번호</b>{reg(s['biz_no'])}</span>
-    </div>
+    <div class="reg">{reg_items(s)}</div>
     <p class="copy">{e(s['name'])}의 모든 콘텐츠는 저작권법의 보호를 받으며, 무단 전재·복사·배포를 금합니다. © {e(s['name'])}</p>
   </div>
 </footer>
@@ -378,14 +375,36 @@ def build_list(title, items, out_path, root, active):
 
 
 def fill_tokens(text):
-    """안내 페이지 원고 속 {{발행인}} 같은 자리를 SITE 값으로 바꿉니다."""
+    """안내 페이지 원고 속 {{발행인}} 같은 자리를 SITE 값으로 바꿉니다.
+    - 이름 칸이 비어 있으면 '예니뉴스 편집국'으로 씁니다.
+    - 주소·전화·이메일 등이 비어 있으면 그 줄을 지웁니다.
+    - {{연락처준비중}} 은 전화와 이메일이 모두 비었을 때만 안내 문장으로 바뀝니다."""
     keys = {"제호": "name", "발행인": "publisher", "편집인": "editor",
             "청소년보호책임자": "youth_officer", "주소": "address",
             "전화": "phone", "이메일": "email", "사업자등록번호": "biz_no"}
-    def rep(m):
-        v = SITE.get(keys.get(m.group(1), ""), "")
-        return v if v else f"[{m.group(1)} 기재 예정]"
-    return re.sub(r"\{\{(.+?)\}\}", rep, text)
+    name_like = {"발행인", "편집인", "청소년보호책임자"}
+    no_contact = not (SITE.get("email") or SITE.get("phone"))
+    out = []
+    for line in text.splitlines():
+        if "{{연락처준비중}}" in line:
+            if no_contact:
+                out.append(line.replace("{{연락처준비중}}", "연락 창구는 준비 중이며 곧 이 페이지에 안내합니다."))
+            continue
+        drop = False
+        def rep(m):
+            nonlocal drop
+            k = m.group(1)
+            v = SITE.get(keys.get(k, ""), "")
+            if v:
+                return v
+            if k in name_like:
+                return f"{SITE['name']} 편집국"
+            drop = True
+            return ""
+        new = re.sub(r"\{\{(.+?)\}\}", rep, line)
+        if not drop:
+            out.append(new)
+    return "\n".join(out)
 
 
 def build_pages():
