@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>라이프 - 예니뉴스</title>
+<meta name="description" content="배움과 사람을 잇는 인터넷신문">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<div class="topbar">
+  <div class="wrap">
+    <span id="today"></span>
+    <nav>
+      <a href="../pages/report.html">기사제보</a>
+      <a href="../pages/ads.html">광고문의</a>
+    </nav>
+  </div>
+</div>
+<header class="masthead">
+  <div class="wrap">
+    <a href="../index.html" class="logo" aria-label="예니뉴스 홈">
+      <b>예니<span>뉴스</span></b>
+      <small>배움과 사람을 잇는 인터넷신문</small>
+    </a>
+  </div>
+</header>
+<nav class="gnb" aria-label="주요 메뉴">
+  <div class="wrap">
+    <a href="../articles/index.html">전체기사</a>
+    <a href="../category/edu.html">교육</a><a href="../category/society.html">사회</a><a href="../category/economy.html">경제</a><a href="../category/culture.html">문화</a><a href="../category/life.html" class="on">라이프</a><a href="../category/opinion.html">오피니언</a><a href="../category/interview.html">인터뷰</a>
+    <a href="#" class="edu">예니뉴스 평생교육원 →</a>
+  </div>
+</nav>
+
+<main class="wrap" style="max-width:900px">
+  <div class="sec-h" style="margin-top:30px"><h2>라이프</h2><span style="font-size:13px;color:#8a929e">0건</span></div>
+  <div class="feed"><p style="padding:40px 0;color:#8a929e">아직 기사가 없습니다.</p></div>
+</main>
+<footer>
+  <div class="wrap">
+    <div class="f-links"><a href="../pages/about.html">회사소개</a><a href="../pages/ethics.html">윤리강령</a><a href="../pages/privacy.html" class="strong">개인정보처리방침</a><a href="../pages/youth.html" class="strong">청소년보호정책</a><a href="../pages/no-email.html">이메일무단수집거부</a><a href="../pages/report.html">기사제보</a><a href="../pages/ads.html">광고문의</a></div>
+    <div class="f-logo">예니<span>뉴스</span></div>
+    <!-- 신문법 제19조 필요적 게재사항 + 청소년보호책임자 (build.py 의 SITE 에서 수정) -->
+    <div class="reg">
+      <span><b>제호</b>예니뉴스</span>
+      <span><b>등록번호</b><span class="fill">[등록 후 기재]</span></span>
+      <span><b>등록일</b><span class="fill">[등록 후 기재]</span></span>
+      <span><b>발행일</b><span class="fill">[기재 예정]</span></span>
+      <span><b>발행인</b><span class="fill">[기재 예정]</span></span>
+      <span><b>편집인</b><span class="fill">[기재 예정]</span></span>
+      <span><b>청소년보호책임자</b><span class="fill">[기재 예정]</span></span>
+    </div>
+    <div class="reg">
+      <span><b>주소</b><span class="fill">[기재 예정]</span></span>
+      <span><b>전화</b><span class="fill">[기재 예정]</span></span>
+      <span><b>이메일</b><span class="fill">[기재 예정]</span></span>
+      <span><b>사업자등록번호</b><span class="fill">[기재 예정]</span></span>
+    </div>
+    <p class="copy">예니뉴스의 모든 콘텐츠는 저작권법의 보호를 받으며, 무단 전재·복사·배포를 금합니다. © 예니뉴스</p>
+  </div>
+</footer>
+<script>
+  (function(){
+    var d=new Date(),w=['일','월','화','수','목','금','토'];
+    document.getElementById('today').textContent=d.getFullYear()+'년 '+(d.getMonth()+1)+'월 '+d.getDate()+'일 ('+w[d.getDay()]+')';
+  })();
+</script>
+</body>
+</html>
