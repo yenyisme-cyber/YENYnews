@@ -164,7 +164,6 @@ def header(root, active=""):
   <div class="wrap">
     <a href="{root}articles/index.html"{all_on}>전체기사</a>
     {nav}
-    <a href="#" class="edu">예니뉴스 평생교육원 →</a>
   </div>
 </nav>
 """
@@ -214,10 +213,10 @@ def fmt_date(d):
     return d.replace("-", ".")
 
 
-def thumb(a, root, label="사진"):
+def thumb(a, root, label=""):
     if a.get("image"):
         return f'<img class="ph" src="{root}{e(a["image"])}" alt="" style="object-fit:cover;padding:0">'
-    return f'<div class="ph{a["ph"]}">{label}</div>'
+    return f'<div class="ph{a["ph"]}">{label or "예니뉴스"}</div>'
 
 
 def link(a, root):
@@ -264,67 +263,63 @@ def feed_items(items, root):
 
 
 def build_index(arts):
+    """첫 화면. 실제 기사만 보여 주고, 기사가 모자란 칸은 숨깁니다."""
     root = ""
-    lead, *side = fill(arts, 5)
-    latest = fill(arts[5:], 5) if len(arts) > 5 else fill([], 0)
-    rank = fill(arts, 5)
+    lead, side, latest = (arts[0] if arts else None), arts[1:5], arts[5:10]
+    rank = arts[:5]
     opinion = [a for a in arts if a["category"] == "오피니언"][:3]
-    notice = ""
-    if not arts:
-        notice = ('<div class="notice">아직 발행된 기사가 없습니다. "예시" 표시가 붙은 자리는 '
-                  '기사가 올라오면 자동으로 바뀝니다.</div>')
-    side_html = "".join(
-        f'<a href="{href(a, root)}"><div><div class="cat">{e(a["category"])}</div>'
-        f'<h3 class="t">{tag(a)}{e(a["title"])}</h3></div>{thumb(a, root)}</a>'
-        for a in side
-    )
-    rank_html = "".join(
-        f'<li><a href="{href(a, root)}">{tag(a)}{e(a["title"])}</a></li>' for a in rank
-    )
-    op_html = "".join(
-        f'<a href="{link(a, root)}"><b>{e(a.get("column", "칼럼"))}</b><span>{e(a["title"])}</span></a>'
-        for a in opinion
-    ) or '<a href="#"><b>칼럼</b><span><span class="sample">예시</span>칼럼이 올라오면 이 자리에 표시됩니다</span></a>'
-    latest_block = ""
-    if latest:
-        latest_block = f"""<div class="feed">{feed_items(latest, root)}</div>"""
-    else:
-        latest_block = f"""<div class="feed">{feed_items(fill([], 3), root)}</div>"""
-    page = head(SITE["name"], root) + header(root) + f"""
-<main class="wrap">
-  {notice}
-  <section class="top" style="margin-top:22px">
-    <a href="{href(lead, root)}" class="lead">
-      {thumb(lead, root, "대표 기사 사진")}
+
+    if lead:
+        side_html = "".join(
+            f'<a href="{link(a, root)}"><div><div class="cat">{e(a["category"])}</div>'
+            f'<h3 class="t">{e(a["title"])}</h3></div>{thumb(a, root)}</a>'
+            for a in side
+        )
+        top = f"""<section class="top{' solo' if not side else ''}" style="margin-top:22px">
+    <a href="{link(lead, root)}" class="lead">
+      {thumb(lead, root, "")}
       <div class="cat">{e(lead["category"])}</div>
-      <h1 class="t">{tag(lead)}{e(lead["title"])}</h1>
+      <h1 class="t">{e(lead["title"])}</h1>
       <p>{e(lead["summary"])}</p>
       <div class="meta">{e(lead["author"])} · 입력 {fmt_date(lead["date"])}</div>
     </a>
-    <div class="side-list">{side_html}</div>
-  </section>
+    {f'<div class="side-list">{side_html}</div>' if side else ''}
+  </section>"""
+    else:
+        top = '<p style="padding:80px 0;text-align:center;color:#8a929e">첫 기사를 준비하고 있습니다.</p>'
+
+    latest_block = ""
+    if latest:
+        latest_block = f"""<div class="sec-h"><h2>최신 기사</h2><a href="articles/index.html">전체보기 ›</a></div>
+      <div class="feed">{feed_items(latest, root)}</div>"""
+    elif arts:
+        latest_block = f"""<div class="sec-h"><h2>전체 기사</h2><a href="articles/index.html">전체보기 ›</a></div>
+      <div class="feed">{feed_items(arts, root)}</div>"""
+    rank_html = "".join(f'<li><a href="{link(a, root)}">{e(a["title"])}</a></li>' for a in rank)
+    rank_block = f"""<div class="rank"><div class="sec-h"><h2>주요 기사</h2></div><ol>{rank_html}</ol></div>""" if len(rank) >= 3 else ""
+    op_block = ""
+    if opinion:
+        op_html = "".join(
+            f'<a href="{link(a, root)}"><b>{e(a.get("column", "칼럼"))}</b><span>{e(a["title"])}</span></a>'
+            for a in opinion)
+        op_block = f'<div class="opinion"><div class="sec-h"><h2>오피니언</h2></div>{op_html}</div>'
+
+    page = head(SITE["name"], root) + header(root) + f"""
+<main class="wrap">
+  {top}
   <div class="body">
     <section>
-      <div class="sec-h"><h2>최신 기사</h2><a href="articles/index.html">전체보기 ›</a></div>
       {latest_block}
       <a href="articles/index.html" class="more">전체 기사 보기</a>
     </section>
     <aside>
-      <div class="rank">
-        <div class="sec-h"><h2>주요 기사</h2></div>
-        <ol>{rank_html}</ol>
-      </div>
+      {rank_block}
       <div class="edu-box">
         <small>예니뉴스 부설 평생교육원</small>
         <h3>배움을 다시 시작하는<br>어른을 위한 온라인 강좌</h3>
         <p>예니뉴스가 운영하는 평생교육원입니다. 교육과정은 준비 중입니다.</p>
-        <a href="#">교육원 바로가기 →</a>
       </div>
-      <div class="opinion">
-        <div class="sec-h"><h2>오피니언</h2></div>
-        {op_html}
-      </div>
-      <div class="ad">배너 광고 자리<br>300 × 250</div>
+      {op_block}
     </aside>
   </div>
 </main>
